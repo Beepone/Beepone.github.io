@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beepone (Joey Ferlatte) · games, music &amp; pixel art</title>
+<meta name="description" content="Joey Ferlatte (Beepone): game developer, music producer and pixel artist in Santa Cruz, CA.">
+<meta property="og:title" content="Beepone (Joey Ferlatte)">
+<meta property="og:description" content="Games, music, pixel art and code by Joey Ferlatte.">
+<meta property="og:image" content="https://beepone.github.io/assets/05_logo.png">
+<link rel="icon" type="image/png" href="assets/05_logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{ --s:4;--logodesk:url(assets/05_logo.png);--logodw:92;--logodh:54;--e1p:var(--e1);--e1r:transparent;--e2p:var(--e2);--e2r:transparent;--e3p:var(--e3);--e3r:transparent;--e4p:var(--e4);--e4r:transparent; --sky:url(assets/01_hero_sky.png);
+--far:url(assets/02_hero_far_mountains.png);
+--near:url(assets/03_hero_near_hills.png);
+--ground:url(assets/04_hero_ground_grass.png);
+--sun:url(assets/08_sprite_sun.png);
+--fig:url(assets/06_sprite_figure_on_rock.png);
+--stars:url(assets/07_sprite_stars.png);
+--t_top:url(assets/10_tile_topsoil.png);
+--t_roots:url(assets/11_tile_roots.png);
+--t_cave:url(assets/12_tile_cave_mouth.png);
+--t_deep:url(assets/13_tile_deep_cavern.png);
+--t_floor:url(assets/14_tile_cavern_floor.png);
+--e1:url(assets/20_edge_shape_topsoil_to_roots.png);
+--e2:url(assets/21_edge_shape_roots_to_cave_mouth.png);
+--e3:url(assets/22_edge_shape_cave_mouth_to_deep.png);
+--e4:url(assets/23_edge_shape_deep_to_floor.png);
+--hroots:url(assets/24_strip_hanging_roots.png);
+--wall:url(assets/25_wall_left.png);
+--crystal:url(assets/30_sprite_wall_crystal.png);
+--fire:url(assets/32_sprite_campfire.png);
+--wtop:url(assets/26_wall_top_left.png);
+--floor:url(assets/28_strip_cave_floor.png); }
+*{box-sizing:border-box}
+body{margin:0;background:#0d0b10;color:#f4ece1;font-family:Inter,system-ui,sans-serif}
+.px{font-family:Silkscreen,monospace}
+*{image-rendering:pixelated}
+a{color:#ffb36b}
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;background:#2a1b3d;height:max(100vh, calc(180px * var(--s)));min-height:560px}
+.l{position:absolute;left:0;right:0;bottom:0;background-repeat:repeat-x;background-position:var(--ox,0) bottom;will-change:transform}
+.sky{height:calc(180px * var(--s));background-image:var(--sky);background-size:calc(320px * var(--s)) 100%}
+.far{height:calc(56px * var(--s));bottom:calc(24px * var(--s));background-image:var(--far);background-size:calc(320px * var(--s)) 100%}
+.near{height:calc(40px * var(--s));bottom:calc(18px * var(--s));background-image:var(--near);background-size:calc(320px * var(--s)) 100%}
+.ground{height:calc(24px * var(--s));background-image:var(--ground);background-size:calc(320px * var(--s)) 100%}
+.sp{position:absolute;background-repeat:no-repeat;background-size:100% 100%}
+.deco{position:absolute;z-index:3}
+.sun{width:calc(var(--sunw,32) * 1px * var(--s));height:calc(var(--sunh,32) * 1px * var(--s));background-image:var(--sun);left:var(--sunx);bottom:var(--suny)}
+.fig{width:calc(32px * var(--s));height:calc(40px * var(--s));background-image:var(--fig);left:var(--figx);bottom:calc(19px * var(--s))}
+.star{width:calc(8px * var(--s));height:calc(8px * var(--s));background-image:var(--stars);background-size:400% 100%;animation:tw 1.6s steps(4) infinite}
+@keyframes tw{to{background-position:133.33% 0}}
+
+.title{position:absolute;left:0;right:0;top:max(9vh, 56px);text-align:center;padding:0 20px;z-index:5}
+.logo{display:none;position:relative;margin:0 0 calc(6px * var(--s));width:calc(var(--logow,0) * var(--lp));height:calc(var(--logoh,0) * var(--lp))}
+/* the logo is drawn at its own size and scaled up by a transform, nudged onto whole screen pixels:
+   layout can only place boxes on 1/64 px steps, which smears pixel art on 2.625x-type phones */
+.logo canvas{position:absolute;left:0;top:0;image-rendering:pixelated}
+.has-logo .logo{display:block}
+.has-logo .title h1,.has-logo .title .tag{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.title h1{font-family:Silkscreen,monospace;font-size:clamp(46px,10vw,104px);line-height:1;margin:0;color:#fff4e3;text-shadow:5px 5px 0 #1a1012}
+.title p{margin:10px 0 0;text-shadow:2px 2px 0 #1a1012}
+.btns{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:20px}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;font-family:Silkscreen,monospace;font-size:14px;text-decoration:none;color:#1a1012;background:#ffd36b;border:2px solid #1a1012;box-shadow:4px 4px 0 #1a1012}
+.btn.alt{background:#f4ece1}
+nav{position:absolute;top:0;left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 22px;padding:14px 16px;z-index:6}
+nav a{font-family:Silkscreen,monospace;font-size:13px;color:#f4ece1;text-decoration:none;padding:10px 2px}
+/* ---------- underground ---------- */
+section{position:relative;overflow:hidden;padding:calc(12px * var(--s)) 0 calc(16px * var(--s));background-size:calc(64px * var(--s));background-repeat:repeat}
+.edge{position:relative;z-index:1;height:calc(12px * var(--s));margin-top:calc(-12px * var(--s))}
+.edge>i{position:absolute;inset:0;-webkit-mask-image:var(--mask);mask-image:var(--mask);-webkit-mask-size:calc(64px * var(--s)) 100%;mask-size:calc(64px * var(--s)) 100%;-webkit-mask-repeat:repeat-x;mask-repeat:repeat-x}
+.edge>.rim{background:var(--rim);transform:translateY(calc(-1px * var(--s)))}
+.edge>.fill{background:var(--tex) left bottom/calc(64px * var(--s)) repeat}
+/* an edge drawn in colour (2+ colours) is shown exactly as drawn, tiled sideways, over the cut */
+.edge>.paint{-webkit-mask:none;mask:none;background:var(--paint,none) left top/calc(64px * var(--s)) 100% repeat-x}
+.edge>.hang{inset:0 0 auto 0;height:calc(var(--hh) * var(--s));background:var(--hang) left top/calc(160px * var(--s)) 100% repeat-x;
+  -webkit-mask-image:var(--mask),linear-gradient(#000,#000);mask-image:var(--mask),linear-gradient(#000,#000);
+  -webkit-mask-size:calc(64px * var(--s)) calc(12px * var(--s)),100% 100%;mask-size:calc(64px * var(--s)) calc(12px * var(--s)),100% 100%;
+  -webkit-mask-position:0 0,0 calc(12px * var(--s));mask-position:0 0,0 calc(12px * var(--s));
+  -webkit-mask-repeat:repeat-x,no-repeat;mask-repeat:repeat-x,no-repeat}
+.floor{position:absolute;left:0;right:0;bottom:0;height:calc(16px * var(--s));background:var(--floor) left bottom/calc(64px * var(--s)) 100% repeat-x;z-index:3}
+.wrap{position:relative;z-index:4;max-width:1000px;margin:0 auto;padding:0 20px}
+.depth{font-family:Silkscreen,monospace;font-size:12px;letter-spacing:2px;color:#c9b8a6}
+h2{font-family:Silkscreen,monospace;font-size:36px;margin:4px 0 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+.card{background:rgba(10,7,12,.55);border:2px solid rgba(255,255,255,.14);padding:16px}
+.card h3{font-family:Silkscreen,monospace;font-size:16px;margin:0 0 6px}
+.card p{margin:0;font-size:14px;color:#e3d4c3}
+.cavezone{position:relative}
+.wtop{position:absolute;top:0;width:calc(32px * var(--s));height:calc(48px * var(--s));background-image:var(--wtop);background-size:100% 100%;z-index:2}
+.wtop.l-side{left:0} .wtop.r-side{right:0;transform:scaleX(-1)}
+.wall{position:absolute;top:calc(48px * var(--s));bottom:0;width:calc(32px * var(--s));background-image:var(--wall);background-size:100% calc(64px * var(--s));background-repeat:repeat-y;z-index:2}
+.wall.l-side{left:0} .wall.r-side{right:0;transform:scaleX(-1)}
+
+@media (max-width:700px){ .wall,.wtop{display:none} }
+.hroots{position:absolute;top:0;left:0;right:0;height:calc(24px * var(--s));background-image:var(--hroots);background-size:calc(160px * var(--s)) 100%;background-repeat:repeat-x;z-index:1}
+.fire{width:calc(48px * var(--s));height:calc(32px * var(--s));background-image:var(--fire);background-size:400% 100%;animation:fire .6s steps(4) infinite;position:relative;top:calc(3px * var(--s));margin:calc(8px * var(--s)) auto calc(-3px * var(--s))}
+@keyframes fire{to{background-position:133.33% 0}}
+/* ---------- explain mode ---------- */
+.explain [data-piece]{outline:2px dashed #00dcff;outline-offset:-2px}
+.explain [data-piece]::after{content:attr(data-piece);position:absolute;left:6px;top:6px;z-index:20;font:600 11px/1.3 Inter,sans-serif;background:#00dcff;color:#0d0b10;padding:2px 6px;white-space:nowrap;transform:none}
+.explain .r-side[data-piece]::after{transform:scaleX(-1)}
+.explain .title{opacity:.25}
+#toggle{position:fixed;right:14px;bottom:14px;z-index:50;font-family:Silkscreen,monospace;font-size:13px;min-height:44px;padding:0 16px;background:#00dcff;color:#0d0b10;border:2px solid #0d0b10;box-shadow:4px 4px 0 #0d0b10;cursor:pointer}
+#scale{position:fixed;left:14px;bottom:14px;z-index:50;font:12px Inter,sans-serif;background:rgba(13,11,16,.85);padding:8px 10px;border:1px solid rgba(255,255,255,.2)}
+.pieces{background:#f6f1ea;color:#1a1012;padding:48px 0 90px}
+.pieces h2{color:#1a1012}
+.pieces p{color:#4a3c44;max-width:720px}
+.pcs{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end}
+.pc{margin:0} .pc img{width:calc(var(--w) * 2px);max-width:100%;display:block;background:repeating-conic-gradient(#ddd 0 25%,#fff 0 50%) 0 0/12px 12px}
+.pc figcaption{font-size:11px;margin-top:6px;max-width:240px;color:#4a3c44}
+@media (prefers-reduced-motion:reduce){.star,.fire{animation:none}}
+</style>
+</head>
+<body class="has-logo">
+<header class="hero" id="hero">
+  <div class="l sky" data-k="0.5"></div>
+  <div class="sp star" data-px="0.12" data-py="0.08" data-k="0.5"></div>
+  <div class="sp star" data-px="0.78" data-py="0.14" style="animation-delay:-.5s" data-k="0.5"></div>
+  <div class="sp star" data-px="0.44" data-py="0.04" style="animation-delay:-1s" data-k="0.5"></div>
+  <div class="sp sun" data-k="0.45"></div>
+  <div class="l far" data-k="0.3"></div>
+  <div class="l near" data-k="0.15"></div>
+  <div class="sp fig" data-k="0.15"></div>
+  <div class="l ground" data-k="0"></div>
+  <nav aria-label="Sections"><a href="#games">Games</a><a href="#music">Music</a><a href="#art">Art + videos</a><a href="#code">Code</a><a href="#about">About</a></nav>
+  <div class="title">
+    <div class="logo" role="img" aria-label="Beepone logo"></div>
+    <h1>BEEPONE</h1>
+    <p class="px tag" style="color:#ffd3a6;font-size:18px">Joey Ferlatte</p>
+    <p class="tag">Game dev, music producer &amp; pixel artist. Santa Cruz, CA.</p>
+    <div class="btns"><a class="btn" href="#games">Play my games</a><a class="btn alt" href="#music">Hear my music</a></div>
+  </div>
+</header>
+
+<section id="games" style="background-image:var(--t_top)">
+  <div class="wrap">
+    <div class="depth">DEPTH 1 · TOPSOIL</div><h2>Games</h2>
+    <div class="grid" id="g-games">
+      <div class="card"><h3>Loot Lasso</h3><p>1v1 lasso showdown. brainCloud ranked it the most challenging game of their jam.</p></div>
+      <div class="card"><h3>Whalefall</h3><p>[ONE-LINE PITCH] In development.</p></div>
+      <div class="card"><h3>Glyph Knight</h3><p>[ONE-LINE PITCH] Solo: art, music and code.</p></div>
+      <div class="card"><h3>A Visit From Venus</h3><p>[ONE-LINE PITCH] Music and code.</p></div>
+    </div>
+  </div>
+</section>
+<div class="edge" style="--mask:var(--e1);--paint:var(--e1p);--tex:var(--t_roots);--rim:var(--e1r,#241812)"><i class="rim"></i><i class="fill"></i><i class="paint"></i><i class="hang" style="--hang:var(--hroots);--hh:24px"></i></div>
+
+<section id="music" style="background-image:var(--t_roots)">
+  <div class="wrap" style="padding-top:calc(16px * var(--s))">
+    <div class="depth">DEPTH 2 · ROOTS</div><h2>Music</h2>
+    <div class="grid">
+      <div class="card"><h3>Candy Crush</h3><p>New single, out Jan 1, 2027. Pre-save on Spotify.</p></div>
+      <div class="card"><h3>Loot Lasso OST</h3><p>Main theme and menu music on SoundCloud.</p></div>
+    </div>
+  </div>
+</section>
+<div class="edge" style="--mask:var(--e2);--paint:var(--e2p);--tex:var(--t_cave);--rim:var(--e2r,#140f12)"><i class="rim"></i><i class="fill"></i><i class="paint"></i></div>
+
+<div class="cavezone">
+<div class="wtop l-side"></div>
+<div class="wtop r-side"></div>
+<div class="wall l-side"></div>
+<div class="wall r-side"></div>
+<section id="art" class="cave" style="background-image:var(--t_cave)">
+  <div class="wrap">
+    <div class="depth" style="padding-top:calc(12px * var(--s))">DEPTH 3 · CAVE MOUTH</div><h2>Art + videos</h2>
+    <div class="grid" id="g-art">
+      <div class="card"><h3>Pixel art</h3><p>Gallery from ArtStation goes here.</p></div>
+      <div class="card"><h3>Loot Lasso trailer</h3><p>YouTube Short, loads when tapped.</p></div>
+      <div class="card"><h3>brainCloud review</h3><p>Ranked most challenging.</p></div>
+    </div>
+  </div>
+</section>
+<div class="edge" style="--mask:var(--e3);--paint:var(--e3p);--tex:var(--t_deep);--rim:var(--e3r,#0f0c13)"><i class="rim"></i><i class="fill"></i><i class="paint"></i></div>
+
+<section id="code" class="cave" style="background-image:var(--t_deep)">
+  <div class="wrap">
+    <div class="depth">DEPTH 4 · DEEP CAVERN</div><h2>Code</h2>
+    <div class="grid">
+      <div class="card"><h3>Whalefall Enemy Editor</h3><p>Unity · C#</p></div>
+      <div class="card"><h3>Music video tools</h3><p>Python</p></div>
+      <div class="card"><h3>This site</h3><p>HTML · CSS · JavaScript</p></div>
+    </div>
+  </div>
+</section>
+<div class="edge" style="--mask:var(--e4);--paint:var(--e4p);--tex:var(--t_floor);--rim:var(--e4r,#09080c)"><i class="rim"></i><i class="fill"></i><i class="paint"></i></div>
+
+<section id="about" class="cave" style="background-image:var(--t_floor)">
+  <div class="wrap">
+    <div class="depth">DEPTH 5 · CAVERN FLOOR</div><h2>About</h2>
+    <p style="max-width:620px;line-height:1.6;color:#e3d4c3">I'm Joey Ferlatte, a game developer, music producer and pixel artist based in Santa Cruz, CA.</p>
+    <div class="fire"></div>
+  </div>
+  <div class="floor"></div>
+</section>
+
+</div>
+
+<img id="wallsrc" alt="" hidden src="assets/25_wall_left.png"><img id="wtopsrc" alt="" hidden src="assets/26_wall_top_left.png">
+<div id="scale" hidden></div>
+<button id="toggle" type="button" hidden></button>
+<script>
+{
+const WALL_SRC=document.getElementById('wallsrc').getAttribute('src');
+const root=document.documentElement, hero=document.getElementById('hero'), info=document.getElementById('scale');
+let s=4, dpr=1;
+const snap=v=>Math.round(v*dpr)/dpr;            // whole screen pixels
+function fit(){
+  dpr=window.devicePixelRatio||1;
+  const h=Math.max(innerHeight,560);
+  const cs0=getComputedStyle(root), logoW=+(cs0.getPropertyValue('--logodw'))||0;
+  const minW=Math.max(96, logoW+8);                // art px a screen must show across
+  let dev=Math.max(2,Math.min(Math.floor(h*dpr/180),Math.floor(innerWidth*dpr/minW)));   // screen px per art px: always whole
+  // on whole-number pixel ratios (most phones and Macs), also keep 1 art px a whole number of CSS px,
+  // so no element ever sits on a half pixel and every piece shares one grid
+  if(Number.isInteger(dpr)&&dpr>1) dev=Math.max(dpr,Math.floor(dev/dpr)*dpr);
+  s=dev/dpr;                                     // the same in CSS px
+  root.style.setProperty('--s',s);
+  hero.style.height=(Math.ceil(Math.max(innerHeight,560)/s)*s)+'px';   // a whole number of art px, so top- and bottom-anchored art share one grid
+  const W=innerWidth/s, phone=innerWidth<=700;   // screen width in art pixels
+  root.style.setProperty('--ox',(Math.floor((W-320)/2)*s)+'px');
+  // logo / sun: sits in the sky above the far mountains; centred under the title on phones,
+  // in the right part of the sky on wide screens, never past the screen edge
+  const sw=+getComputedStyle(root).getPropertyValue('--sunw')||32, sh=+getComputedStyle(root).getPropertyValue('--sunh')||32;
+  const sx=phone?Math.floor((W-sw)/2):Math.min(Math.floor(W*0.8-sw/2),Math.floor(W-sw-6));
+  root.style.setProperty('--sunx',(Math.max(0,sx)*s)+'px');
+  root.style.setProperty('--suny',((phone?72:84)*s)+'px');
+  for(const st of document.querySelectorAll('.star')){   // stars on whole art pixels too
+    st.style.left=(Math.floor(W*st.dataset.px)*s)+'px'; st.style.top=(Math.floor(Math.max(innerHeight,560)/s*st.dataset.py)*s)+'px';
+  }
+  // logo in the title: 1 logo px = 1 art px on every screen
+  const cs=getComputedStyle(root);
+  if(cs.getPropertyValue('--logodesk').trim()){
+    root.style.setProperty('--logo','var(--logodesk)');
+    const lw=+cs.getPropertyValue('--logodw'), lh=+cs.getPropertyValue('--logodh');
+    root.style.setProperty('--logow',lw); root.style.setProperty('--logoh',lh); root.style.setProperty('--lp',s+'px');root.style.setProperty('--lps',s);
+    const lg=document.querySelector('.logo'), tt=document.querySelector('.title');
+    const navB=document.querySelector('nav').getBoundingClientRect().bottom-document.getElementById('hero').getBoundingClientRect().top;
+    tt.style.top=(Math.ceil((navB+2*s)/s)*s)+'px';   // below the menu, on the art grid
+    const x=snap(Math.floor((W-lw)/2)*s);            // left edge on a whole art pixel
+    lg.style.marginLeft=(x-tt.getBoundingClientRect().left-parseFloat(getComputedStyle(tt).paddingLeft))+'px';
+    // draw the logo on a canvas with one canvas pixel per screen pixel, so it stays exact even on 2.625x-type phones
+    let cv=lg.querySelector('canvas'); if(!cv){cv=document.createElement('canvas');lg.appendChild(cv);}
+    const url=(cs.getPropertyValue('--logodesk').match(/url\(["']?([^"')]+)/)||[])[1];
+    // browsers lay boxes out in 1/64 px steps; on 2.625x-type screens most positions fall between screen pixels and smear.
+    // q = the smallest step that is both a whole 1/64 px and a whole screen pixel; the canvas is placed on that step.
+    let q=1/dpr; for(let k=1;k<=512;k++){ if(Math.abs(k*dpr/64-Math.round(k*dpr/64))<1e-6){q=k/64;break;} }
+    // the canvas size is padded to whole steps too, or the browser stretches it by a hair and one row slips
+    const qd=Math.round(q*dpr), cw=Math.ceil(lw*dev/qd)*qd, ch=Math.ceil(lh*dev/qd)*qd;
+    if(cv.width!==cw||cv.height!==ch){cv.width=cw; cv.height=ch; cv.dataset.src='';}
+    cv.style.width=(cw/dpr)+'px'; cv.style.height=(ch/dpr)+'px';
+    cv.style.left='0px'; cv.style.top='0px';
+    const r=cv.getBoundingClientRect(), L=Math.round(r.left/q)*q, T=Math.round((r.top+scrollY)/q)*q;
+    cv.style.left=(L-r.left)+'px'; cv.style.top=(T-r.top-scrollY)+'px';
+    if(url&&cv.dataset.src!==url+dev){const im=new Image();im.onload=()=>{const c=cv.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,cv.width,cv.height);c.drawImage(im,0,0,lw*dev,lh*dev);cv.dataset.src=url+dev;};im.src=url;}
+  }
+  root.style.setProperty('--figx',(Math.floor(phone?W-36:W*0.1)*s)+'px');
+  info.textContent=phone?('1 art px = '+dev+' screen px'):('1 art px = '+dev+' screen px · screen shows '+Math.floor(W)+' × '+Math.floor(h/s)+' art px');
+  layout(); par();
+}
+// Round every section to whole art pixels, so the next layer's tiles start on the pixel grid,
+// and space decorations along the walls by height: a taller section simply gets more of them.
+function layout(){
+  for(const sec of document.querySelectorAll('section:not(.pieces)')){
+    const wrap=sec.querySelector('.wrap');
+    const pad=28*s, need=wrap.getBoundingClientRect().height+pad;
+    sec.style.height=(Math.ceil(need/s)*s)+'px';
+  }
+}
+// Read the wall art to find its inner edge on every row, so crystals attach to the rock
+// whatever shape the wall is drawn in.
+let inner=null, capInner=null;
+function edgeProfile(src,done){
+  const im=new Image();
+  im.onload=()=>{
+    const c=document.createElement('canvas'); c.width=im.width; c.height=im.height;
+    const g=c.getContext('2d'); g.drawImage(im,0,0);
+    const d=g.getImageData(0,0,im.width,im.height).data, out=[];
+    for(let y=0;y<im.height;y++){ let e=0; for(let x=0;x<im.width;x++) if(d[(y*im.width+x)*4+3]>0) e=x+1; out.push(e); }
+    done(out);
+  };
+  im.src=src;
+}
+edgeProfile(WALL_SRC,p=>{inner=p;placeDeco();});
+edgeProfile(document.getElementById('wtopsrc').getAttribute('src'),p=>{capInner=p;placeDeco();});
+const WALL_TOP=48, WALL_H=64;
+function edgeAt(y0,h){
+  let lo=99,hi=0;
+  for(let y=y0;y<y0+h;y++){ const e=y<WALL_TOP?capInner[y]:inner[((y-WALL_TOP)%WALL_H+WALL_H)%WALL_H]; lo=Math.min(lo,e); hi=Math.max(hi,e); }
+  return [lo,hi];
+}
+function put(zone,img,x,y,w,h,flipX,flipY,label){
+  const d=document.createElement('div'); d.className='sp deco';
+  const side=flipX?'right':'left';
+  d.style.cssText=side+':'+x*s+'px;top:'+y*s+'px;width:'+w*s+'px;height:'+h*s+'px;background-image:'+img+';transform:scale('+(flipX?-1:1)+','+(flipY?-1:1)+')';
+  if(label) d.dataset.piece=label;
+  zone.appendChild(d); return d;
+}
+function placeDeco(){
+  const zone=document.querySelector('.cavezone');
+  zone.querySelectorAll('.deco').forEach(d=>d.remove());
+  if(!inner||!capInner||innerWidth<=700) return;
+  const z0=zone.getBoundingClientRect().top;
+  const sec=id=>{const r=document.getElementById(id).getBoundingClientRect();return [Math.round((r.top-z0)/s),Math.round(r.height/s)];};
+  const wrapLeft=document.querySelector('#art .grid').getBoundingClientRect().left/s-2;   // keep clear of the cards
+  // Crystals: every 32 art px down the Art section, alternating walls, socket pressed into the rock
+  const [aTop,aH]=sec('art'); let n=0;
+  for(let y=aTop+14;y+24<=aTop+aH+4;y+=32){
+    const [lo]=edgeAt(y,24); if(lo<6) continue;
+    const x=lo-3;
+    if(x+24>wrapLeft) continue;
+    n++;
+    put(zone,'var(--crystal)',x,y,24,24,n%2===0,false,n===1?'30 wall crystal 24x24 · placed on the inner edge of the wall':'');
+  }
+}
+const ro=new ResizeObserver(()=>{layout();placeDeco();});
+window.__live={fit:()=>fit(),refresh:()=>{edgeProfile(document.getElementById('wallsrc').getAttribute('src'),p=>{inner=p;placeDeco();});edgeProfile(document.getElementById('wtopsrc').getAttribute('src'),p=>{capInner=p;placeDeco();});layout();}};
+document.querySelectorAll('section:not(.pieces) .wrap').forEach(w=>ro.observe(w));
+const layers=[...hero.querySelectorAll('[data-k]')];
+const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function par(){
+  if(still) return;
+  const y=Math.min(scrollY,hero.offsetHeight);
+  for(const el of layers){
+    const k=parseFloat(el.dataset.k);
+    el.style.transform='translateY('+snap(Math.round(y*k/s)*s)+'px)';   // move in whole art pixels
+  }
+}
+fit(); addEventListener('resize',fit);
+addEventListener('scroll',()=>requestAnimationFrame(par),{passive:true});
+let n=0;
+document.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{
+  const g=document.getElementById('g-'+b.dataset.add);
+  const c=document.createElement('div'); c.className='card';
+  c.innerHTML='<h3>New card '+(++n)+'</h3><p>Extra content. The section grows, the tiles keep repeating at the same size.</p>';
+  g.appendChild(c);
+}));
+const t=document.getElementById('toggle');
+t.onclick=()=>{const on=document.body.classList.toggle('explain');t.setAttribute('aria-pressed',on);t.textContent=on?'Hide the pieces':'Show the pieces';};
+}
+</script>
+</body>
+</html>
